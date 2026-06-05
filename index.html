@@ -36,9 +36,7 @@
           </svg>
         </button>
       </div>
-      <div
-        class="logo flex items-center gap-2 text-lg font-bold text-white"
-      >
+      <div class="logo flex items-center gap-2 text-lg font-bold text-white">
         <span style="color: var(--green)">⚡</span>
 
         <span class="hidden lg:inline">FruitAI</span>
@@ -114,7 +112,9 @@
                     <div class="hud-badge" id="fpsDisplay">FPS: 45.0</div>
                   </div>
                   <div class="flex justify-between items-end">
-                    <div class="lg:text-[10px] md:text-[10px] text-[5.5px] font-mono text-white/40">
+                    <div
+                      class="lg:text-[10px] md:text-[10px] text-[5.5px] font-mono text-white/40"
+                    >
                       YOLOv8n · 800x450 · Inference Engine
                     </div>
                     <div class="hud-badge" style="color: var(--blue)">
@@ -323,19 +323,21 @@
                 </select>
                 <button
                   onclick="applyAllAugments()"
-                  class="px-3 py-1 bg-blue-600 text-white rounded lg:text-[11px] md:text-[11px] text-[6.5px]"
+                  class="px-3 py-1 bg-blue-600 text-white rounded lg:text-[11px] md:text-[11px] text-[7.5px]"
                 >
                   ✨ Apply All
                 </button>
                 <button
                   onclick="resetAugments()"
-                  class="px-3 py-1 bg-white/10 text-gray-300 rounded lg:text-[11px] md:text-[11px] text-[6.5px]"
+                  class="px-3 py-1 bg-white/10 text-gray-300 rounded lg:text-[11px] md:text-[11px] text-[7.5px]"
                 >
                   ↺ Reset
                 </button>
               </div>
             </div>
-            <p class="lg:text-[11px] md:text-[11px] text-[6.5px] text-gray-400 mb-4">
+            <p
+              class="lg:text-[11px] md:text-[11px] text-[7.5px] text-gray-400 mb-4"
+            >
               ការផ្លាស់ប្តូររូបភាពដើម ដើម្បីបង្កើនប្រសិទ្ធភាពហ្វឹកហាត់របស់ម៉ូដែល
               AI ឱ្យធន់នឹងលក្ខខណ្ឌបរិស្ថានផ្សេងៗ។
             </p>
@@ -618,13 +620,13 @@
                 <button
                   id="btnTrain"
                   onclick="toggleTraining()"
-                  class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-mono"
+                  class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded lg:text-[14px] md:text-[14px] text-[9px] font-mono"
                 >
                   ▶ ចាប់ផ្ដើម Train
                 </button>
                 <button
                   onclick="resetTraining()"
-                  class="px-3 py-1.5 bg-white/10 text-gray-300 rounded text-xs font-mono"
+                  class="px-3 py-1.5 bg-white/10 text-gray-300 rounded lg:text-[14px] md:text-[14px] text-[9px] font-mono"
                 >
                   ↺ Reset
                 </button>
