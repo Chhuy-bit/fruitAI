@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FruitAI Pro — Educational AI/ML Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+<div id="header">
+  <div id ="MenuIcon" class="flex items-center lg:hidden ">
+    <button id="btnMenu" onclick="toggleSidebar()"class="p-1.5 bg-white/10 hover:bg-white/20 text-gray-300 rounded transition-all duration-200 ">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+      </svg>
+    </button>
+  </div>
+  <div class="logo flex items-center gap-2 lg:text-lg md:text-lg text-[9px]  font-bold text-white">
+    <span style="color:var(--green)">⚡</span> FruitAI <span style="font-weight:300;opacity:0.7;">PRO</span>
+    <span class="logo-badge  lg:text-[9px] md:text-[9px] text-[5px]">V2.1 - កម្រិតខ្ពស់</span>
+  </div>
+  <div class="flex items-center gap-6 lg:text-[11px] md:text-[11px] text-[5px] font-mono text-gray-500">
+    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> SYSTEM: ONLINE</div>
+    <div>DEVICE: RASPBERRY PI 4</div>
+    <div>ENGINE: YOLOv8-NANO</div>
+  </div>
+</div>
+
+<div id="app">
+  <nav id="sidebar " class = "hidden lg:block">
+    <div class="nav-section">ការចាប់រូបភាព (Computer Vision)</div>
+    <div class="nav-item active" onclick="nav('detect')">🎯 ការ Detect បច្ចុប្បន្ន</div>
+    <div class="nav-item" onclick="nav('collect')">📸 ប្រមូលទិន្នន័យ (Dataset)</div>
+    <div class="nav-item" onclick="nav('augment')">🖼️ Data Augmentation</div>
+    
+    <div class="nav-section">ការវាយតម្លៃម៉ូដែល (Evaluation)</div>
+    <div class="nav-item" onclick="nav('confusion')">📊 Confusion Matrix</div>
+    <div class="nav-item" onclick="nav('models')">⚡ ប្រៀបធៀបម៉ូដែល</div>
+    <div class="nav-item" onclick="nav('training')">📈 Training Metrics</div>
+    <div class="nav-item" onclick="nav('gradcam')">🔍 Explainable AI (Grad-CAM)</div>
+    
+    <div class="nav-section">Hardware & IoT</div>
+    <div class="nav-item" onclick="nav('robot')">🤖 Robot Sorting</div>
+    <div class="nav-item" onclick="nav('smartfarm')">🌾 កសិដ្ឋានវៃឆ្លាត</div>
+    <div class="nav-item" onclick="nav('edge')">🖥️ Edge AI Dashboard</div>
+    <div class="nav-item" onclick="nav('iot')">📡 IoT Integration (MQTT)</div>
+  </nav>
+  
+
+  <div id="content">
+    
+    <!-- ━━━━━━ 1. PAGE: DETECTION ━━━━━━ -->
+    <div class="page active" id="page-detect">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div class="cam-container">
+            <canvas id="detectCanvas" width="800" height="450"></canvas>
+            <div class="hud-overlay">
+              <div class="hud-top">
+                <div class="hud-badge">MODE: INFERENCE_SIM</div>
+                <div class="hud-badge" id="fpsDisplay">FPS: 45.0</div>
+              </div>
+              <div class="flex justify-between items-end">
+                <div class="text-[10px] font-mono text-white/40">YOLOv8n · 800x450 · Inference Engine</div>
+                <div class="hud-badge" style="color:var(--blue)">LIVE FEED</div>
+              </div>
+            </div>
+            <div class="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-blue-500/10 to-transparent h-1 w-full animate-[scan_3s_linear_infinite]" id="scanLine" style="display:none;"></div>
+          </div>
+
+          <div class="mt-4 flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex gap-2">
+              <button id="btnToggle" onclick="toggleInference()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-mono text-sm rounded-lg transition-all flex items-center gap-2">
+                <span id="btnIcon">▶</span> <span id="btnText">ចាប់ផ្ដើម Detect</span>
+              </button>
+              <button onclick="resetDetectionStats()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 font-mono text-sm rounded-lg transition-all">
+                ↺ សូន្យឡើងវិញ
+              </button>
+            </div>
+            <div class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
+              <span class="text-xs font-mono text-gray-400">Confidence Threshold:</span>
+              <input type="range" min="30" max="95" value="50" oninput="confThreshold = this.value/100; document.getElementById('confVal').innerText = this.value + '%'" class="w-24 accent-blue-500">
+              <span id="confVal" class="text-xs font-mono text-blue-400 w-8">50%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="card">
+            <div class="card-title mb-4">ស្ថិតិការចាប់បាន (Live Statistics)</div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <div class="text-[10px] text-gray-500 mb-1">ចេក (BANANA)</div>
+                <div class="text-2xl font-bold text-[#f5c842]" id="countBanana">0</div>
+              </div>
+              <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <div class="text-[10px] text-gray-500 mb-1">ប៉ោម (APPLE)</div>
+                <div class="text-2xl font-bold text-[#e84c4c]" id="countApple">0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card flex-1">
+            <div class="card-title mb-4">LOG ការវិភាគបច្ចុប្បន្ន</div>
+            <div id="logBox" class="font-mono text-[10px] h-[220px] overflow-y-auto space-y-1 text-gray-400 p-2 bg-black/30 rounded-lg">
+              <div class="text-blue-400">[SYSTEM] ចាប់ផ្ដើមប្រឡងប្រព័ន្ធ...</div>
+              <div class="text-green-400">[READY] ម៉ូដែល YOLOv8 រួចរាល់សម្រាប់ការវិភាគ។</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━ 2. PAGE: DATA COLLECTION ━━━━━━ -->
+    <div class="page" id="page-collect">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div class="cam-container">
+            <canvas id="collectCanvas" width="800" height="450"></canvas>
+            <div class="hud-overlay">
+              <div class="hud-top">
+                <div class="hud-badge" style="color:var(--orange); border-color:var(--orange)">STUDIO MODE: COLLECT</div>
+              </div>
+              <div class="text-[10px] font-mono text-white/40">ALIGN FRUIT IN CENTER BOUNDING BOX</div>
+            </div>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <select id="collectLabel" class="px-4 py-2 bg-white/10 text-white rounded-lg border border-white/10 text-sm font-mono focus:outline-none">
+              <option value="banana">🍌 ចេក (Banana)</option>
+              <option value="apple">🍎 ប៉ោម (Apple)</option>
+            </select>
+            <button onclick="captureDataImage()" class="px-6 py-2 bg-[#f0883e] hover:bg-orange-500 text-white font-mono text-sm rounded-lg transition-all">
+              📸 ថតរក្សាទុក (Capture)
+            </button>
+            <button onclick="clearDataset()" class="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 font-mono text-sm rounded-lg transition-all">
+              🗑 សម្អាតទាំងអស់
+            </button>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="card">
+            <div class="card-title mb-4">ស្ថិតិសរុប (Dataset Summary)</div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <div class="text-[10px] text-gray-500">ចេក (Captured)</div>
+                <div class="text-xl font-bold" id="dsBanCount">0</div>
+              </div>
+              <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <div class="text-[10px] text-gray-500">ប៉ោម (Captured)</div>
+                <div class="text-xl font-bold" id="dsAppCount">0</div>
+              </div>
+            </div>
+            <div class="text-xs text-gray-400 leading-relaxed font-light">
+              <strong class="text-blue-400">YOLO Label Format:</strong><br>
+              <code class="block bg-black/40 p-2 rounded mt-1 font-mono text-[10px] text-gray-300">
+                &lt;class_id&gt; &lt;x_center&gt; &lt;y_center&gt; &lt;width&gt; &lt;height&gt;
+              </code>
+            </div>
+          </div>
+          <div class="card">
+             <div class="card-title mb-3">រូបភាពដែលបានថត (Gallery)</div>
+             <div id="captureGallery" class="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">
+                <div class="text-[10px] text-gray-500 text-center col-span-3 py-6">គ្មានរូបភាពនៅឡើយទេ</div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━ 3. PAGE: DATA AUGMENTATION ━━━━━━ -->
+    <div class="page" id="page-augment">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Data Augmentation Simulation (ការបន្ថែមទិន្នន័យសិប្បនិម្មិត)</div>
+          <div class="flex gap-2">
+            <select id="augFruitSelect" onchange="initAug()" class="px-3 py-1 bg-white/5 border border-white/10 rounded text-xs font-mono">
+               <option value="banana">🍌 Banana</option>
+               <option value="apple">🍎 Apple</option>
+            </select>
+            <button onclick="applyAllAugments()" class="px-3 py-1 bg-blue-600 text-white rounded text-xs">✨ Apply All</button>
+            <button onclick="resetAugments()" class="px-3 py-1 bg-white/10 text-gray-300 rounded text-xs">↺ Reset</button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 mb-4">ការផ្លាស់ប្តូររូបភាពដើម ដើម្បីបង្កើនប្រសិទ្ធភាពហ្វឹកហាត់របស់ម៉ូដែល AI ឱ្យធន់នឹងលក្ខខណ្ឌបរិស្ថានផ្សេងៗ។</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="augGrid">
+           <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━ 4. PAGE: CONFUSION MATRIX ━━━━━━ -->
+    <div class="page" id="page-confusion">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"> Confusion Matrix Evaluation (ម៉ាទ្រីសច្រឡំ)</div>
+            </div>
+            <p class="text-xs text-gray-400 mb-6">ម៉ាទ្រីសវាស់ស្ទង់សមត្ថភាពម៉ូដែលរវាងលទ្ធផលជាក់ស្ដែង (Actual) និងការទស្សន៍ទាយ (Predicted)។</p>
+            
+            <div class="grid grid-cols-3 gap-4 items-center">
+              <div></div>
+              <div class="text-center font-mono text-xs text-gray-400">Pred: BANANA</div>
+              <div class="text-center font-mono text-xs text-gray-400">Pred: APPLE</div>
+
+              <div class="text-right font-mono text-xs text-gray-400 pr-2">Actual:<br>BANANA</div>
+              <div class="cm-cell cm-tp">
+                <div class="text-2xl font-bold text-green-400" id="cm-tp-val">82</div>
+                <div class="text-[9px] text-gray-400 mt-1">True Positive (TP)</div>
+                <div class="text-[8px] text-green-500/80">ចេក → ចេក (ត្រូវ)</div>
+              </div>
+              <div class="cm-cell cm-fn">
+                <div class="text-2xl font-bold text-orange-400" id="cm-fn-val">8</div>
+                <div class="text-[9px] text-gray-400 mt-1">False Negative (FN)</div>
+                <div class="text-[8px] text-orange-500/80">ចេក → ប៉ោម (ខុស)</div>
+              </div>
+
+              <div class="text-right font-mono text-xs text-gray-400 pr-2">Actual:<br>APPLE</div>
+              <div class="cm-cell cm-fp">
+                <div class="text-2xl font-bold text-red-400" id="cm-fp-val">6</div>
+                <div class="text-[9px] text-gray-400 mt-1">False Positive (FP)</div>
+                <div class="text-[8px] text-red-500/80">ប៉ោម → ចេក (ខុស)</div>
+              </div>
+              <div class="cm-cell cm-tn">
+                <div class="text-2xl font-bold text-green-400" id="cm-tn-val">84</div>
+                <div class="text-[9px] text-gray-400 mt-1">True Negative (TN)</div>
+                <div class="text-[8px] text-green-500/80">ប៉ោម → ប៉ោម (ត្រូវ)</div>
+              </div>
+            </div>
+
+            <div class="mt-6 flex flex-wrap gap-4 p-4 bg-white/5 rounded-lg border border-white/5 items-center">
+              <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs text-gray-400 mb-2 font-mono">លៃតម្រូវ Confidence Threshold:</label>
+                <input type="range" id="cmThreshold" min="20" max="95" value="70" oninput="updateConfusionMatrixLogic()" class="w-full accent-blue-500">
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-gray-500">កម្រិតលៃតម្រូវបច្ចុប្បន្ន</div>
+                <div class="text-lg font-mono text-blue-400 font-bold" id="cmThresholdVal">70%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="card">
+            <div class="card-title mb-4">លទ្ធផលគណនា (Performance Scores)</div>
+            <div class="space-y-3">
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span>Accuracy (ភាពត្រឹមត្រូវរួម)</span>
+                  <span class="text-green-400" id="mAcc">91.1%</span>
+                </div>
+                <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div class="h-full bg-green-500 transition-all duration-300" id="barAcc" style="width: 91.1%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span>Precision (ភាពច្បាស់លាស់)</span>
+                  <span class="text-blue-400" id="mPrec">93.1%</span>
+                </div>
+                <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 transition-all duration-300" id="barPrec" style="width: 93.1%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span>Recall (កម្រិតរំលឹកឡើងវិញ)</span>
+                  <span class="text-purple-400" id="mRec">91.1%</span>
+                </div>
+                <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div class="h-full bg-purple-500 transition-all duration-300" id="barRec" style="width: 91.1%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span>F1 Score (ពិន្ទុរួម F1)</span>
+                  <span class="text-orange-400" id="mF1">92.1%</span>
+                </div>
+                <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div class="h-full bg-orange-500 transition-all duration-300" id="barF1" style="width: 92.1%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+             <div class="card-title mb-2">រូបមន្តគណនា</div>
+             <div class="font-mono text-[9px] text-gray-500 space-y-1">
+                <div>• Accuracy = (TP + TN) / Total</div>
+                <div>• Precision = TP / (TP + FP)</div>
+                <div>• Recall = TP / (TP + FN)</div>
+                <div>• F1 = 2 * (P * R) / (P + R)</div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━ 5. PAGE: MODEL COMPARE ━━━━━━ -->
+    <div class="page" id="page-models">
+       <div class="card">
+          <div class="card-header">
+             <div class="card-title">Model Comparison (ប្រៀបធៀបម៉ូដែល YOLOv8 & v11)</div>
+          </div>
+          <p class="text-xs text-gray-400 mb-6">ការប្រៀបធៀបរវាងល្បឿន Inference Speed (FPS) ធៀបនឹងកម្រិតភាពត្រឹមត្រូវ mAP@50 នៅលើ Edge Devices ដូចជា Raspberry Pi 4។</p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+             <div class="bg-black/30 p-4 rounded-lg border border-white/5">
+                <div class="font-bold text-sm text-green-400">YOLOv8-Nano</div>
+                <div class="text-2xl font-bold font-mono mt-2">45 FPS</div>
+                <div class="text-xs text-gray-500">mAP@50: 88.5%</div>
+                <div class="text-[10px] font-mono text-gray-600 mt-1">Size: 3.2MB · Params: 3.2M</div>
+             </div>
+             <div class="bg-black/30 p-4 rounded-lg border border-white/5 border-blue-500/30">
+                <div class="font-bold text-sm text-blue-400">YOLOv8-Small</div>
+                <div class="text-2xl font-bold font-mono mt-2">32 FPS</div>
+                <div class="text-xs text-gray-500">mAP@50: 92.1%</div>
+                <div class="text-[10px] font-mono text-gray-600 mt-1">Size: 11.2MB · Params: 11.2M</div>
+             </div>
+             <div class="bg-black/30 p-4 rounded-lg border border-white/5">
+                <div class="font-bold text-sm text-orange-400">YOLOv8-Medium</div>
+                <div class="text-2xl font-bold font-mono mt-2">20 FPS</div>
+                <div class="text-xs text-gray-500">mAP@50: 95.3%</div>
+                <div class="text-[10px] font-mono text-gray-600 mt-1">Size: 25.8MB · Params: 25.9M</div>
+             </div>
+             <div class="bg-black/30 p-4 rounded-lg border border-white/5">
+                <div class="font-bold text-sm text-purple-400">YOLOv11-Nano</div>
+                <div class="text-2xl font-bold font-mono mt-2">25 FPS</div>
+                <div class="text-xs text-gray-500">mAP@50: 97.2%</div>
+                <div class="text-[10px] font-mono text-gray-600 mt-1">Size: 5.4MB · Params: 2.6M</div>
+             </div>
+          </div>
+          
+          <div class="h-[250px] bg-black/40 p-4 rounded-lg border border-white/10 relative">
+             <canvas id="tradeoffChart"></canvas>
+          </div>
+       </div>
+    </div>
+
+    <!-- ━━━━━━ 6. PAGE: TRAINING ━━━━━━ -->
+    <div class="page" id="page-training">
+       <div class="card">
+          <div class="card-header">
+             <div class="card-title">Training Progress (ការវិវត្តនៃការហ្វឹកហាត់)</div>
+             <div class="flex gap-2 items-center">
+                <button id="btnTrain" onclick="toggleTraining()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-mono">▶ ចាប់ផ្ដើម Train</button>
+                <button onclick="resetTraining()" class="px-3 py-1.5 bg-white/10 text-gray-300 rounded text-xs font-mono">↺ Reset</button>
+                <span class="text-xs font-mono text-gray-400 ml-4">Epoch: <span id="currentEpoch" class="text-blue-400">0</span>/50</span>
+             </div>
+          </div>
+          <div class="w-full bg-white/5 h-2 rounded-full mb-6 overflow-hidden">
+             <div class="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300" id="trainingProgress" style="width: 0%"></div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div class="bg-black/30 p-4 rounded-lg border border-white/5">
+                <div class="text-xs text-gray-400 mb-2 font-mono">Loss Metrics (កាន់តែទាបកាន់តែល្អ)</div>
+                <canvas id="lossChart" class="h-[180px] w-full"></canvas>
+             </div>
+             <div class="bg-black/30 p-4 rounded-lg border border-white/5">
+                <div class="text-xs text-gray-400 mb-2 font-mono">mAP & Precision Metrics (កាន់តែខ្ពស់កាន់តែល្អ)</div>
+                <canvas id="accuracyChart" class="h-[180px] w-full"></canvas>
+             </div>
+          </div>
+       </div>
+    </div>
+
+    <!-- ━━━━━━ 7. PAGE: EXPLAINABLE AI (GRAD-CAM) ━━━━━━ -->
+    <div class="page" id="page-gradcam">
+       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2">
+             <div class="card">
+                <div class="card-header">
+                   <div class="card-title">Grad-CAM Feature Activation (ផែនទីកម្ដៅសម្រេចចិត្តរបស់ AI)</div>
+                </div>
+                <p class="text-xs text-gray-400 mb-4">បង្ហាញតំបន់ចក្ខុវិញ្ញាណដែលម៉ូដែល YOLOv8 ផ្ដោតយកចិត្តទុកដាក់បំផុតដើម្បីកំណត់អត្តសញ្ញាណផ្លែឈើ។</p>
+                <div class="cam-container">
+                   <canvas id="gradCamCanvas" width="800" height="450"></canvas>
+                </div>
+             </div>
+          </div>
+          <div class="space-y-4">
+             <div class="card">
+                <div class="card-title mb-4">ជម្រើសផ្លែឈើ</div>
+                <div class="flex gap-2">
+                   <button onclick="showGradCam('banana')" id="gcBtnBanana" class="flex-1 py-2 bg-blue-600 text-white rounded text-xs font-mono">🍌 Banana</button>
+                   <button onclick="showGradCam('apple')" id="gcBtnApple" class="flex-1 py-2 bg-white/10 text-gray-400 rounded text-xs font-mono">🍎 Apple</button>
+                </div>
+             </div>
+             <div class="card">
+                <div class="card-title mb-3">របាយការណ៍បច្ចេកទេស (Features Weight)</div>
+                <div class="space-y-4 text-xs font-mono" id="gcFeatureResults">
+                   <!-- Content loaded dynamically based on fruit selected -->
+                </div>
+             </div>
+          </div>
+       </div>
+    </div>
+
+    <!-- ━━━━━━ 8. PAGE: ROBOT SORTING ━━━━━━ -->
+    <div class="page" id="page-robot">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+         <div class="lg:col-span-2">
+            <div class="card">
+               <div class="card-header">
+                  <div class="card-title">Conveyor Belt & Sorting System (ប្រព័ន្ធរៀបចំចំណាត់ថ្នាក់ស្វ័យប្រវត្ត)</div>
+                  <button id="btnToggleRobot" onclick="toggleRobotSorting()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-mono">▶ បើកខ្សែចង្វាក់</button>
+               </div>
+               <p class="text-xs text-gray-400 mb-4">AI Detect ផ្លែឈើនៅលើខ្សែក្រវ៉ាត់ រួចបញ្ជាដៃយន្ត Servo Gate ដើម្បីទាត់ផ្លែឈើឱ្យធ្លាក់ចូលប្រអប់តាមប្រភេទ។</p>
+               <div class="cam-container" style="aspect-ratio: 21/9;">
+                  <canvas id="robotCanvas" width="1000" height="428"></canvas>
+               </div>
+            </div>
+         </div>
+         <div class="space-y-4">
+            <div class="card">
+               <div class="card-title mb-4">ស្ថានភាពដៃយន្ត (Servo Angle)</div>
+               <div class="space-y-4">
+                  <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                     <div class="flex justify-between text-xs font-mono">
+                        <span>Servo A (ផ្លែចេក)</span>
+                        <span class="text-[#f5c842]" id="servoA_angle">0° (Standby)</span>
+                     </div>
+                     <div class="w-full bg-white/5 h-1.5 rounded-full mt-2 overflow-hidden">
+                        <div class="h-full bg-[#f5c842] transition-all" id="servoA_bar" style="width: 0%"></div>
+                     </div>
+                  </div>
+                  <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                     <div class="flex justify-between text-xs font-mono">
+                        <span>Servo B (ផ្លែប៉ោម)</span>
+                        <span class="text-[#e84c4c]" id="servoB_angle">0° (Standby)</span>
+                     </div>
+                     <div class="w-full bg-white/5 h-1.5 rounded-full mt-2 overflow-hidden">
+                        <div class="h-full bg-[#e84c4c] transition-all" id="servoB_bar" style="width: 0%"></div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="card">
+               <div class="card-title mb-3">លទ្ធផលច្រកប្រអប់</div>
+               <div class="grid grid-cols-2 gap-2 font-mono">
+                  <div class="bg-black/30 p-3 rounded text-center border border-white/5">
+                     <div class="text-[10px] text-gray-500">ចេកដែលបានរៀបចំ</div>
+                     <div class="text-xl font-bold text-[#f5c842]" id="robotBanSorted">0</div>
+                  </div>
+                  <div class="bg-black/30 p-3 rounded text-center border border-white/5">
+                     <div class="text-[10px] text-gray-500">ប៉ោមដែលបានរៀបចំ</div>
+                     <div class="text-xl font-bold text-[#e84c4c]" id="robotAppSorted">0</div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━ 9. PAGE: SMART FARM ━━━━━━ -->
+    <div class="page" id="page-smartfarm">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">ប្រព័ន្ធគ្រប់គ្រងកសិដ្ឋានវៃឆ្លាត (AI Agriculture)</div>
+          <span class="px-2 py-1 bg-green-500/20 text-green-500 text-[10px] rounded">ACTIVE</span>
+        </div>
+        <p class="text-sm text-gray-400 mb-6 font-light">ការប្រើប្រាស់ Computer Vision ដើម្បីពិនិត្យមើលភាពទុំ និងជំងឺរបស់ផ្លែឈើក្នុងកសិដ្ឋាន។</p>
+        <div class="cam-container" style="aspect-ratio: 21/9;">
+           <canvas id="farmCanvas" width="1000" height="400"></canvas>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card">
+           <div class="card-title mb-3">សុខភាពដំណាំ</div>
+           <div class="text-3xl font-bold text-green-500">98%</div>
+           <div class="text-[10px] text-gray-500 mt-1">Excellent Condition</div>
+        </div>
+        <div class="card">
+           <div class="card-title mb-3">ព្យាករណ៍ផលប្រមូល</div>
+           <div class="text-3xl font-bold text-blue-500">1.2 Tons</div>
+           <div class="text-[10px] text-gray-500 mt-1">Estimating in 5 days</div>
+        </div>
+        <div class="card">
+           <div class="card-title mb-3">ការប្រើប្រាស់ទឹក</div>
+           <div class="text-3xl font-bold text-orange-500">Normal</div>
+           <div class="text-[10px] text-gray-500 mt-1">Optimized by AI</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━ 10. PAGE: EDGE AI DASHBOARD ━━━━━━ -->
+    <div class="page" id="page-edge">
+       <div class="card">
+          <div class="card-header">
+             <div class="card-title">Raspberry Pi 4 - Edge AI Hardware Statistics</div>
+          </div>
+          <p class="text-xs text-gray-400 mb-6">ការតាមដានរាល់សកម្មភាព Hardware, CPU, Temperature ក្នុងអំឡុងពេលដែល AI ដំណើរការ (Real-time Inference)។</p>
+          
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+             <div class="bg-black/40 p-4 rounded-lg border border-white/5 text-center">
+                <div class="text-xs text-gray-500">CPU Usage</div>
+                <div class="text-3xl font-bold font-mono text-blue-400 mt-1" id="edgeCPU">45%</div>
+                <div class="w-full bg-white/5 h-1 rounded-full mt-3 overflow-hidden">
+                   <div class="bg-blue-500 h-full" id="edgeCPU_bar" style="width: 45%"></div>
+                </div>
+             </div>
+             <div class="bg-black/40 p-4 rounded-lg border border-white/5 text-center">
+                <div class="text-xs text-gray-500">Temperature</div>
+                <div class="text-3xl font-bold font-mono text-orange-400 mt-1" id="edgeTemp">52.4°C</div>
+                <div class="w-full bg-white/5 h-1 rounded-full mt-3 overflow-hidden">
+                   <div class="bg-orange-500 h-full" id="edgeTemp_bar" style="width: 52%"></div>
+                </div>
+             </div>
+             <div class="bg-black/40 p-4 rounded-lg border border-white/5 text-center">
+                <div class="text-xs text-gray-500">RAM Usage</div>
+                <div class="text-3xl font-bold font-mono text-purple-400 mt-1" id="edgeRAM">2.1 GB</div>
+                <div class="w-full bg-white/5 h-1 rounded-full mt-3 overflow-hidden">
+                   <div class="bg-purple-500 h-full" id="edgeRAM_bar" style="width: 50%"></div>
+                </div>
+             </div>
+             <div class="bg-black/40 p-4 rounded-lg border border-white/5 text-center">
+                <div class="text-xs text-gray-500">Power Draw</div>
+                <div class="text-3xl font-bold font-mono text-green-400 mt-1" id="edgePower">3.8W</div>
+                <div class="w-full bg-white/5 h-1 rounded-full mt-3 overflow-hidden">
+                   <div class="bg-green-500 h-full" id="edgePower_bar" style="width: 60%"></div>
+                </div>
+             </div>
+          </div>
+          
+          <div class="bg-black/30 p-4 rounded-lg border border-white/5">
+             <div class="text-xs text-gray-400 mb-2 font-mono">Inference Latency Profile (Milliseconds)</div>
+             <div class="h-[150px] relative">
+                <canvas id="latencyChart"></canvas>
+             </div>
+          </div>
+       </div>
+    </div>
+
+    <!-- ━━━━━━ 11. PAGE: IoT INTEGRATION ━━━━━━ -->
+    <div class="page" id="page-iot">
+       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2">
+             <div class="card">
+                <div class="card-header">
+                   <div class="card-title">MQTT Publish Broker Node-Red Pipeline</div>
+                </div>
+                <p class="text-xs text-gray-400 mb-4">ការបញ្ជូនទិន្នន័យ AI Metadata (JSON) ទៅកាន់ម៉ាស៊ីនមេពពក (Cloud API) តាមរយៈពិធីការ MQTT សម្រាប់បញ្ជាឧបករណ៍បន្ត។</p>
+                
+                <div class="bg-black/30 p-4 rounded-lg border border-white/5 font-mono text-xs space-y-3 mb-4">
+                   <div class="text-blue-400">// MQTT Connection Payload Sample</div>
+                   <div class="text-gray-400">
+                     <span class="text-purple-400">topic:</span> "fruitai/detections"<br>
+                     <span class="text-purple-400">payload:</span> {<br>
+                     &nbsp;&nbsp;"timestamp": <span class="text-green-400">1709428510</span>,<br>
+                     &nbsp;&nbsp;"device_id": <span class="text-green-400">"raspberrypi-edge-01"</span>,<br>
+                     &nbsp;&nbsp;"data": { "banana": <span class="text-yellow-400" id="iotJsonBanana">1</span>, "apple": <span class="text-red-400" id="iotJsonApple">1</span> }<br>
+                     }
+                   </div>
+                </div>
+                
+                <div class="flex gap-2">
+                   <button onclick="sendMockIotMessage()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-mono">📡 បាញ់ទិន្នន័យ (Publish MQTT)</button>
+                   <button onclick="clearIotLogs()" class="px-3 py-2 bg-white/10 text-gray-300 rounded text-xs">Clear Stream</button>
+                </div>
+             </div>
+          </div>
+          <div class="card flex flex-col h-full">
+             <div class="card-title mb-3">Live MQTT Client Log Stream</div>
+             <div id="iotLogs" class="bg-black/40 p-3 rounded-lg border border-white/5 font-mono text-[10px] space-y-1 text-gray-400 flex-1 min-h-[250px] overflow-y-auto">
+                <div class="text-green-400">[CONNECT] Connected to broker.hivemq.com:1883</div>
+                <div class="text-blue-400">[SUBSCRIBE] Subscribed to topic: fruitai/detections</div>
+             </div>
+          </div>
+       </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
