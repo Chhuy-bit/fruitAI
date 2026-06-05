@@ -170,6 +170,14 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+@media screen and (max-width: 480px) {
+  .card {
+    padding: 12px;
+  }
+  .card-title {
+    font-size: 6.5px;
+  }
+}
 
 .cam-container {
   position: relative;
