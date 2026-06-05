@@ -120,7 +120,7 @@ body {
   }
 
   .nav-section {
-    font-size: 6px;
+    font-size: 8px;
   }
 }
 
@@ -207,6 +207,12 @@ canvas {
   color: var(--green);
   border: 1px solid rgba(63, 185, 80, 0.25);
 }
+@media screen and (max-width: 480px) {
+  .hud-badge {
+    font-size: 6.5px;
+    padding: 1.5px 5.5px;
+  }
+} 
 
 /* Interactive Matrix grid cells */
 .cm-cell {
